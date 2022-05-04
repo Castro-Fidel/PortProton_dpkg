@@ -6,6 +6,7 @@ unset PW_AUTOPLAY PW_SET_LANG PW_SILENT_INSTALL
 export portname="PortProton"
 export port_ver=1.0
 ########################################################################
+export NO_AT_BRIDGE=1
 ENG_LANG="English"
 RUS_LANG="Russian (Русский)"
 [ -z "${LANG}" ] && export LANG=C
