@@ -8,7 +8,7 @@ export port_ver=1.0
 ########################################################################
 [ -z "${LANG}" ] && export LANG=C
 deflink="${HOME}/PortWINE/${portname}"
-[ $(id -u) -eq 0 ] && echo "Do not run the script from the superuser!" && zenity --error --text "Do not run the script from the superuser!" 2> /dev/null  && exit 1
+[ $(id -u) -eq 0 ] && echo "The script should NOT be run by root!" && zenity --error --text "The script should NOT be run by root!" 2> /dev/null  && exit 1
 if [ "$(dirname "`readlink -f "$0"`")" == "/usr/bin" ] ; then
 	[ -z "${XDG_DATA_HOME}" ] && export XDG_DATA_HOME="$HOME/.local/share"
 	if [ -f "${XDG_DATA_HOME}/PortWINE/PortProton/data/scripts/start.sh" ] ; then
@@ -150,7 +150,7 @@ try_download_scripts () {
 		try_download_scripts
 	fi
 }
-if [ "${PW_SILENT_INSTALL}" = "1" ] & [ ! -f "/usr/bin/portproton" ] ; then
+if [ "${PW_SILENT_INSTALL}" = "1" ] && [ ! -f "/usr/bin/portproton" ] ; then
 	try_download_scripts
 else
 	try_download_scripts | progress_bar
