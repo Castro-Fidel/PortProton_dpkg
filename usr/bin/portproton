@@ -8,7 +8,7 @@ export port_ver=1.0
 ########################################################################
 [ -z "${LANG}" ] && export LANG=C
 deflink="${HOME}/PortWINE/${portname}"
-[ $(id -u) -eq 0 ] && echo "The script should NOT be run by root!" && zenity --error --text "The script should NOT be run by root!" 2> /dev/null  && exit 1
+[ "$(id -u)" -eq 0 ] && echo "The script should NOT be run by root!" && zenity --error --text "The script should NOT be run by root!" 2> /dev/null  && exit 1
 if [ "$(dirname "$(readlink -f "$0")")" == "/usr/bin" ] ; then
 	[ -z "${XDG_DATA_HOME}" ] && export XDG_DATA_HOME="$HOME/.local/share"
 	if [ -f "${XDG_DATA_HOME}/PortWINE/PortProton/data/scripts/start.sh" ] ; then
@@ -41,6 +41,7 @@ if [ "${vexit}" -eq "1" ] ; then
 fi
 ########################################################################
 cd "$(dirname "$(readlink -f "$0")")" || exit
+export links
 links="$(pwd)"
 ########################################################################
 if [ "$1" = "-rus" ] ; then
@@ -61,7 +62,7 @@ elif [ -z "${PW_SET_LANG}" ] ; then
 		"English")
 			INFO_TEXT="You’ve started PortWINE installer ${portname} v. ${port_ver}. \n\nIt is a non-commercial product and is developed only for the idea and with the help of your donations. \nAll third-party software rights belong to their respective owners! \n If you continue the installation, you agree to these terms." > /dev/null 2>&1 ;;
 	esac
-	$(zenity --info --title "INFO" --text "$INFO_TEXT" --no-wrap ) 2> /dev/null
+	eval "$(zenity --info --title "INFO" --text "$INFO_TEXT" --no-wrap 2> /dev/null)"
 	if [ $? -eq 1 ] ; then echo "error" && exit 1 ; fi
 fi
 ########################################################################
@@ -140,7 +141,8 @@ try_download_scripts () {
 			cp -fr "${PORT_WINE_TMP_PATH}/PortWINE-master/data_from_portwine/"* "${PORT_WINE_PATH}/data/"
 			rm -f "${PORT_WINE_TMP_PATH}/PortWINE-master.tar.gz"
 			rm -fr "${PORT_WINE_TMP_PATH}/PortWINE-master/"
-			export scripts_current_ver=$(cat "${PORT_WINE_PATH}/data/scripts/var" | grep SCRIPTS_NEXT_VERSION | awk -F "=" '{print $2}')
+			export scripts_current_ver
+			scripts_current_ver=$(cat "${PORT_WINE_PATH}/data/scripts/var" | grep SCRIPTS_NEXT_VERSION | awk -F "=" '{print $2}')
 			echo "${scripts_current_ver}" > "${PORT_WINE_TMP_PATH}/scripts_ver"
 		else
 			rm -f "${PORT_WINE_TMP_PATH}/PortWINE-master.tar.gz"
