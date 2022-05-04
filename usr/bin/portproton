@@ -127,7 +127,7 @@ case $PW_SET_LANG in
 esac
 ########################################################################
 export PORT_WINE_TMP_PATH="${PORT_WINE_PATH}/data/tmp"
-cd "${PORT_WINE_PATH}"
+cd "${PORT_WINE_PATH}" || zenity --error --text "Could NOT change directory to ${PORT_WINE_PATH}!" 2> /dev/null  && exit 1
 try_download_scripts () {
 	wget -O "${PORT_WINE_TMP_PATH}/PortWINE-master.tar.gz" -nd -c --read-timeout 300 \
 	--retry-connrefused --timeout 15 --tries 3 \
@@ -157,6 +157,7 @@ else
 fi
 chmod 755 -R "${PORT_WINE_PATH}"
 ########################################################################
-cd "${PORT_WINE_PATH}/data/scripts"
+scrpts="${PORT_WINE_PATH}/data/scripts"
+cd "$scrpts" || zenity --error --text "Could NOT change directory to $scrpts" 2> /dev/null  && exit 1
 /usr/bin/env bash "${PORT_WINE_PATH}/data/scripts/setup.sh" && exit 0
 ################################ARCH_BIN################################
