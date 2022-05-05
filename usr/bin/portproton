@@ -11,12 +11,14 @@ ENG_LANG="English"
 RUS_LANG="Russian (Русский)"
 [ -z "${LANG}" ] && export LANG=C
 deflink="${HOME}/PortWINE/${portname}"
-[ "$(id -u)" -eq 0 ] && echo "This script should NOT be run by root!" && zenity --error --text "This script should NOT be run by root!" 2> /dev/null && exit 1
+err_msg="This script should NOT be run by root!"
+[ "$(id -u)" -eq 0 ] && echo "${err_msg}" && zenity --error --text "${err_msg}" 2> /dev/null && exit 1
 my_dir=$(dirname "$(readlink -f "$0")")
-if [ "$my_dir" == "/usr/bin" ] ; then
-	[ -z "${XDG_DATA_HOME}" ] && export XDG_DATA_HOME="$HOME/.local/share"
-	if [ -f "${XDG_DATA_HOME}/PortWINE/PortProton/data/scripts/start.sh" ] ; then
-		/usr/bin/env bash "${XDG_DATA_HOME}/PortWINE/PortProton/data/scripts/start.sh" "$@"
+if [ "${my_dir}" == "/usr/bin" ] ; then
+	[ -z "${XDG_DATA_HOME}" ] && export XDG_DATA_HOME="${HOME}/.local/share"
+	start_script="${XDG_DATA_HOME}/PortWINE/${portname}/data/scripts/start.sh"
+	if [ -f "${start_script}" ] ; then
+		/usr/bin/env bash "${start_script}" "$@"
 		exit 0
 	else
 		if [ -n "$(locale | grep "LANG=ru_RU.UTF-8")" ] ; then
@@ -33,18 +35,20 @@ fi
 export INSTALLING_PORT=1
 export PROGS_INST=""
 export vexit=0
+export port_deps=("wget" "curl" "tar" "awk" "zenity" "cabextract" "pidof")
 ########################################################################
-for PROGS in "wget" "curl" "tar" "awk" "zenity" "cabextract" "pidof" ; do
+for PROGS in "${port_deps[@]}" ; do
 	if [ ! -x "$(which "${PROGS}" 2>/dev/null)" ] ; then
 		PROGS_INST="${PROGS_INST} ${PROGS}" && vexit=1
 	fi
 done
 if [ "${vexit}" -eq "1" ] ; then
-    echo "You will need to install: ${PROGS_INST}, and restart the script"
-    exit 1
+	printf "You need to install these utilities: \n %s \n and restart the script!" "${PROGS_INST}"
+	exit 1
 fi
 ########################################################################
-cd "$my_dir"
+err_msg="Could NOT change directory to ${my_dir}!"
+cd "${my_dir}" || (echo "${err_msg}" && zenity --error --text "${err_msg}" 2> /dev/null && exit 1)
 export links
 links="$(pwd)"
 ########################################################################
@@ -55,11 +59,11 @@ elif [ "$1" = "-eng" ] ; then
 	PW_SET_LANG=$ENG_LANG
 	export PW_SILENT_INSTALL="1"
 elif [ -z "${PW_SET_LANG}" ] ; then
-	PW_SET_LANG=$(zenity --title  "Install $portname" --text "Select installation language:" --list --radiolist \
+	PW_SET_LANG=$(zenity --title "Install $portname" --text "Select installation language:" --list --radiolist \
 --column="" --column "Language" \
 	TRUE  "$RUS_LANG" \
 	FALSE "$ENG_LANG" ) 2> /dev/null
-	if [ $? -eq 1 ] ; then echo "Installation language not set!" && exit 1 ; fi
+	if [ $? -eq 1 ] ; then echo "Installation language NOT set!" && exit 1 ; fi
 	case $PW_SET_LANG in
 		"$RUS_LANG")
 			INFO_TEXT="Вы запустили установщик PortWINE ${portname} версии ${port_ver}. \n\nЭто некоммерческий продукт и развивается исключительно за идею и Ваши пожертвования. \nВсе права стороннего программного обеспечения принадлежат их владельцам! \nПродолжая установку, Вы автоматически соглашаетесь с данными условиями." > /dev/null 2>&1 ;;
@@ -76,11 +80,11 @@ if [ "${PW_SILENT_INSTALL}" = "1" ] ; then
 else
 	case $PW_SET_LANG in
 		"$RUS_LANG")
-			inst1=$(zenity --title  "Установка ${portname}" --text "Выберите путь для установки (обновления) PortWINE \nили оставьте его по умолчанию." --list --radiolist --width=350 --height=220 \
+			inst1=$(zenity --title "Установка ${portname}" --text "Выберите путь для установки (обновления) PortWINE \nили оставьте его по умолчанию." --list --radiolist --width=350 --height=220 \
 			--column="" --column "Путь:" \
 			TRUE  "${deflink}" \
 			FALSE "Другой путь..." ) 2> /dev/null
-			if [ $? -eq 1 ] ; then echo "Installation path not set!" && exit 1 ; fi
+			if [ $? -eq 1 ] ; then echo "Installation path NOT set!" && exit 1 ; fi
 			case $inst1 in
 				"${deflink}")
 					D_PATH="${deflink}" ;;
@@ -89,11 +93,11 @@ else
 					D_PATH="${D_PATH}/${portname}" ;;
 			esac ;;
 		"$ENG_LANG")
-			inst1=$(zenity --title  "Install ${portname}" --text "Choose path to install (update) PortWINE \nor leave it as default." --list --radiolist --width=350 --height=220 \
+			inst1=$(zenity --title "Install ${portname}" --text "Choose path to install (update) PortWINE \nor leave it as default." --list --radiolist --width=350 --height=220 \
 			--column="" --column "Path:" \
 			TRUE  "${deflink}" \
 			FALSE "Other path..." ) 2> /dev/null
-			if [ $? -eq 1 ] ; then echo "Installation path not set!" && exit 1; fi
+			if [ $? -eq 1 ] ; then echo "Installation path NOT set!" && exit 1; fi
 			case $inst1 in
 				"${deflink}")
 					D_PATH="${deflink}" ;;
@@ -119,7 +123,7 @@ esac
 export PORT_WINE_PATH="${D_PATH}"
 scripts_dir="${PORT_WINE_PATH}/data/scripts"
 if [ ! -d "${PORT_WINE_PATH}" ] ; then
-    mkdir -p "$PORT_WINE_PATH"
+	mkdir -p "$PORT_WINE_PATH"
 else
 	rm -fr "${PORT_WINE_PATH}/data/tmp"
 	rm -f "${scripts_dir}/"* > /dev/null 2>&1
@@ -133,30 +137,37 @@ case $PW_SET_LANG in
 esac
 ########################################################################
 export PORT_WINE_TMP_PATH="${PORT_WINE_PATH}/data/tmp"
-cd "${PORT_WINE_PATH}"
+err_msg="Could NOT change directory to ${PORT_WINE_PATH}!"
+cd "${PORT_WINE_PATH}" || (echo "${err_msg}" && zenity --error --text "${err_msg}" 2> /dev/null && exit 1)
+
 try_download_scripts () {
-	wget -O "${PORT_WINE_TMP_PATH}/PortWINE-master.tar.gz" -nd -c --read-timeout 300 \
+	local PORT_WINE_ZIP="${PORT_WINE_TMP_PATH}/PortWINE-master.tar.gz"
+	local PORT_WINE_LNK="https://github.com/Castro-Fidel/PortWINE/archive/refs/heads/master.tar.gz"
+
+	wget -O "${PORT_WINE_ZIP}" \
+	-nd -c --read-timeout 300 \
 	--retry-connrefused --timeout 15 --tries 3 \
-    --user-agent="Mozilla/5.0 (compatible; Konqueror/2.1.1; X11)" \
-	"https://github.com/Castro-Fidel/PortWINE/archive/refs/heads/master.tar.gz"
+	--user-agent="Mozilla/5.0 (compatible; Konqueror/2.1.1; X11)" \
+	"${PORT_WINE_LNK}"
 	if [ "$?" = "0" ] ; then
-		tar -xvzf "${PORT_WINE_TMP_PATH}/PortWINE-master.tar.gz" -C "${PORT_WINE_TMP_PATH}"
+		tar -xvzf "${PORT_WINE_ZIP}" -C "${PORT_WINE_TMP_PATH}"
 		if [ "$?" = "0" ] ; then
 			[ ! -d "${PORT_WINE_PATH}/data/" ] && mkdir "${PORT_WINE_PATH}/data/"
 			cp -fr "${PORT_WINE_TMP_PATH}/PortWINE-master/data_from_portwine/"* "${PORT_WINE_PATH}/data/"
-			rm -f "${PORT_WINE_TMP_PATH}/PortWINE-master.tar.gz"
+			rm -f "${PORT_WINE_ZIP}"
 			rm -fr "${PORT_WINE_TMP_PATH}/PortWINE-master/"
 			export scripts_current_ver
 			scripts_current_ver=$(cat "${scripts_dir}/var" | grep SCRIPTS_NEXT_VERSION | awk -F "=" '{print $2}')
 			echo "${scripts_current_ver}" > "${PORT_WINE_TMP_PATH}/scripts_ver"
 		else
-			rm -f "${PORT_WINE_TMP_PATH}/PortWINE-master.tar.gz"
+			rm -f "${PORT_WINE_ZIP}"
 			try_download_scripts
 		fi
 	else
 		try_download_scripts
 	fi
 }
+
 if [ "${PW_SILENT_INSTALL}" = "1" ] && [ ! -f "/usr/bin/portproton" ] ; then
 	try_download_scripts
 else
@@ -164,6 +175,7 @@ else
 fi
 chmod 755 -R "${PORT_WINE_PATH}"
 ########################################################################
-cd "${scripts_dir}"
+err_msg="Could NOT change directory to ${scripts_dir}!"
+cd "${scripts_dir}" || (echo "${err_msg}" && zenity --error --text "${err_msg}" 2> /dev/null && exit 1)
 /usr/bin/env bash "${scripts_dir}/setup.sh" && exit 0
 ################################ARCH_BIN################################
