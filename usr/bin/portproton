@@ -10,9 +10,15 @@ export NO_AT_BRIDGE=1
 ENG_LANG="English"
 RUS_LANG="Russian"
 [ -z "${LANG}" ] && export LANG=C
+
+print_error_and_exit() {
+	local msg=$1
+	echo "${msg}" && zenity --error --text "${msg}" 2> /dev/null
+	exit 1
+}
+
 deflink="${HOME}/PortWINE/${portname}"
-err_msg="This script should NOT be run by root!"
-[ "$(id -u)" -eq 0 ] && echo "${err_msg}" && zenity --error --text "${err_msg}" 2> /dev/null && exit 1
+[ "$(id -u)" -eq 0 ] && print_error_and_exit "This script should NOT be run by root!"
 my_dir=$(dirname "$(readlink -f "$0")")
 if [ "${my_dir}" == "/usr/bin" ] ; then
 	[ -z "${XDG_DATA_HOME}" ] && export XDG_DATA_HOME="${HOME}/.local/share"
@@ -21,7 +27,7 @@ if [ "${my_dir}" == "/usr/bin" ] ; then
 		/usr/bin/env bash "${start_script}" "$@"
 		exit 0
 	else
-		if [ -n "$(locale | grep "LANG=ru_RU.UTF-8")" ] ; then
+		if locale | grep -q "LANG=ru_RU.UTF-8"; then
 			PW_SET_LANG=$RUS_LANG
 		else
 			PW_SET_LANG=$ENG_LANG
@@ -42,13 +48,9 @@ for PROGS in "${port_deps[@]}" ; do
 		PROGS_INST="${PROGS_INST} ${PROGS}" && vexit=1
 	fi
 done
-if [ "${vexit}" -eq "1" ] ; then
-	printf "You need to install these utilities: \n %s \n and restart the script!" "${PROGS_INST}"
-	exit 1
-fi
+[ "${vexit}" -eq "1" ] && print_error_and_exit "You need to install these utilities: ${PROGS_INST} and restart the script!"
 ########################################################################
-err_msg="Could NOT change directory to ${my_dir}!"
-cd "${my_dir}" || (echo "${err_msg}" && zenity --error --text "${err_msg}" 2> /dev/null && exit 1)
+cd "${my_dir}" || print_error_and_exit "Could NOT change directory to ${my_dir}!"
 export links
 links="$(pwd)"
 ########################################################################
@@ -63,7 +65,7 @@ elif [ -z "${PW_SET_LANG}" ] ; then
 --column="" --column "Language" \
 	TRUE  "$RUS_LANG" \
 	FALSE "$ENG_LANG" ) 2> /dev/null
-	if [ $? -eq 1 ] ; then echo "Installation language NOT set!" && exit 1 ; fi
+	[ $? -eq 1 ] && print_error_and_exit "Installation language NOT set!"
 	case $PW_SET_LANG in
 		"$RUS_LANG")
 			INFO_TEXT="Вы запустили установщик PortWINE ${portname} версии ${port_ver}. \n\nЭто некоммерческий продукт и развивается исключительно за идею и Ваши пожертвования. \nВсе права стороннего программного обеспечения принадлежат их владельцам! \nПродолжая установку, Вы автоматически соглашаетесь с данными условиями." > /dev/null 2>&1 ;;
@@ -71,7 +73,7 @@ elif [ -z "${PW_SET_LANG}" ] ; then
 			INFO_TEXT="You’ve started PortWINE ${portname} installer v.${port_ver}. \n\nIt is a non-commercial product and is developed only for the idea and with the help of your donations. \nAll third-party software rights belong to their respective owners! \nIf you continue installation, you agree to these terms." > /dev/null 2>&1 ;;
 	esac
 	zenity --info --title "INFO" --text "$INFO_TEXT" --no-wrap 2> /dev/null
-	if [ $? -eq 1 ] ; then echo "INFO message not displayed!" && exit 1 ; fi
+	[ $? -eq 1 ] && print_error_and_exit "INFO message NOT displayed!"
 fi
 ########################################################################
 if [ "${PW_SILENT_INSTALL}" = "1" ] ; then
@@ -84,7 +86,7 @@ else
 			--column="" --column "Путь:" \
 			TRUE  "${deflink}" \
 			FALSE "Другой путь..." ) 2> /dev/null
-			if [ $? -eq 1 ] ; then echo "Installation path NOT set!" && exit 1 ; fi
+			[ $? -eq 1 ] && print_error_and_exit "Не указан путь установки!"
 			case $inst1 in
 				"${deflink}")
 					D_PATH="${deflink}" ;;
@@ -97,7 +99,7 @@ else
 			--column="" --column "Path:" \
 			TRUE  "${deflink}" \
 			FALSE "Other path..." ) 2> /dev/null
-			if [ $? -eq 1 ] ; then echo "Installation path NOT set!" && exit 1; fi
+			[ $? -eq 1 ] && print_error_and_exit "Installation path NOT set!"
 			case $inst1 in
 				"${deflink}")
 					D_PATH="${deflink}" ;;
@@ -106,7 +108,7 @@ else
 					D_PATH="${D_PATH}/${portname}" ;;
 			esac ;;
 	esac
-	if [ $? -eq 1 ] ; then echo "error" && exit 1 ; fi
+	[ $? -eq 1 ] && print_error_and_exit "error"
 fi
 ########################################################################
 case $PW_SET_LANG in
@@ -137,27 +139,25 @@ case $PW_SET_LANG in
 esac
 ########################################################################
 export PORT_WINE_TMP_PATH="${PORT_WINE_PATH}/data/tmp"
-err_msg="Could NOT change directory to ${PORT_WINE_PATH}!"
-cd "${PORT_WINE_PATH}" || (echo "${err_msg}" && zenity --error --text "${err_msg}" 2> /dev/null && exit 1)
+cd "${PORT_WINE_PATH}" || print_error_and_exit "Could NOT change directory to ${PORT_WINE_PATH}!"
 
 try_download_scripts () {
 	local PORT_WINE_ZIP="${PORT_WINE_TMP_PATH}/PortWINE-master.tar.gz"
 	local PORT_WINE_LNK="https://github.com/Castro-Fidel/PortWINE/archive/refs/heads/master.tar.gz"
 
-	wget -O "${PORT_WINE_ZIP}" \
-	-nd -c --read-timeout 300 \
-	--retry-connrefused --timeout 15 --tries 3 \
-	--user-agent="Mozilla/5.0 (compatible; Konqueror/2.1.1; X11)" \
-	"${PORT_WINE_LNK}"
-	if [ "$?" = "0" ] ; then
-		tar -xvzf "${PORT_WINE_ZIP}" -C "${PORT_WINE_TMP_PATH}"
-		if [ "$?" = "0" ] ; then
+	if wget -O "${PORT_WINE_ZIP}" \
+		-nd -c --read-timeout 300 \
+		--retry-connrefused --timeout 15 --tries 3 \
+		--user-agent="Mozilla/5.0 (compatible; Konqueror/2.1.1; X11)" \
+		"${PORT_WINE_LNK}";
+	then
+		if tar -xvzf "${PORT_WINE_ZIP}" -C "${PORT_WINE_TMP_PATH}"; then
 			[ ! -d "${PORT_WINE_PATH}/data/" ] && mkdir "${PORT_WINE_PATH}/data/"
 			cp -fr "${PORT_WINE_TMP_PATH}/PortWINE-master/data_from_portwine/"* "${PORT_WINE_PATH}/data/"
 			rm -f "${PORT_WINE_ZIP}"
 			rm -fr "${PORT_WINE_TMP_PATH}/PortWINE-master/"
 			export scripts_current_ver
-			scripts_current_ver=$(cat "${scripts_dir}/var" | grep SCRIPTS_NEXT_VERSION | awk -F "=" '{print $2}')
+			scripts_current_ver=$(grep SCRIPTS_NEXT_VERSION "${scripts_dir}/var" | awk -F "=" '{print $2}')
 			echo "${scripts_current_ver}" > "${PORT_WINE_TMP_PATH}/scripts_ver"
 		else
 			rm -f "${PORT_WINE_ZIP}"
@@ -175,6 +175,5 @@ else
 fi
 chmod 755 -R "${PORT_WINE_PATH}"
 ########################################################################
-err_msg="Could NOT change directory to ${scripts_dir}!"
-cd "${scripts_dir}" || (echo "${err_msg}" && zenity --error --text "${err_msg}" 2> /dev/null && exit 1)
+cd "${scripts_dir}" || print_error_and_exit "Could NOT change directory to ${scripts_dir}!"
 /usr/bin/env bash "${scripts_dir}/setup.sh" && exit 0
