@@ -8,7 +8,7 @@ export port_ver=1.0
 ########################################################################
 export NO_AT_BRIDGE=1
 ENG_LANG="English"
-RUS_LANG="Russian (Русский)"
+RUS_LANG="Russian"
 [ -z "${LANG}" ] && export LANG=C
 deflink="${HOME}/PortWINE/${portname}"
 [ "$(id -u)" -eq 0 ] && echo "This script should NOT be run by root!" && zenity --error --text "This script should NOT be run by root!" 2> /dev/null && exit 1
@@ -166,4 +166,3 @@ chmod 755 -R "${PORT_WINE_PATH}"
 ########################################################################
 cd "${scripts_dir}"
 /usr/bin/env bash "${scripts_dir}/setup.sh" && exit 0
-################################ARCH_BIN################################
