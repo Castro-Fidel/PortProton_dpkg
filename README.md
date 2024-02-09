@@ -1,2 +1,2 @@
- <img src="usr/share/pixmaps/portproton.png" width="40"/>
+ <img src="usr/share/pixmaps/portproton.svg" width="40"/>
 
