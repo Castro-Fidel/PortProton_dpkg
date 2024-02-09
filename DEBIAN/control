@@ -1,16 +1,15 @@
 Package: portproton
-Version: 1.0
+Version: 1.4
 Architecture: amd64
 Installed-Size: 450
-Depends: apt (>= 1.6) | apt-transport-https, ca-certificates, coreutils (>= 8.23-1~) | realpath, curl, file, libc6 (>= 2.15), libnss3 (>= 2:3.26), policykit-1, xz-utils, zenity, bubblewrap, curl, icoutils, tar, vulkan-tools, libvulkan1, libvulkan1:i386, wget, zenity, zstd, cabextract, xdg-utils, openssl, bc, libgl1-mesa-glx, libgl1-mesa-glx:i386
+Depends: apt (>= 1.6) | apt-transport-https, ca-certificates, coreutils (>= 8.23-1~) | realpath, curl, file, libc6 (>= 2.15), libnss3 (>= 2:3.26), policykit-1, xz-utils, bubblewrap, icoutils, tar, vulkan-tools, libvulkan1, libvulkan1:i386, zstd, cabextract, xdg-utils, openssl, bc, libgl1, libgl1:i386, wmctrl, pciutils, desktop-file-utils, fontconfig, imagemagick, yad
 Recommends: gamemode, inxi
 Section: games
 Priority: optional
 Multi-Arch: foreign
-Homepage: https://portwine-linux.ru
+Homepage: https://linux-gaming.ru
 License: MIT
-Description: Software for playing Microsoft Windows games and launchers
- .
+Description: Software for playing Microsoft Windows games and launchers.
  On Debian, you may need to run as root:
  dpkg --add-architecture i386; apt update
-Maintainer: PortWine-Linux.ru (tergoevm@gmail.com)
+Maintainer: linux-gaming.ru (tergoevm@gmail.com)

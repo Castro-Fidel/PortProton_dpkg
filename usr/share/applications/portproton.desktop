@@ -1,13 +1,16 @@
 [Desktop Entry]
 Name=PortProton
-Comment=Software for playing Microsoft Windows games and launchers
 Name[ru]=PortProton
+Comment=Software for playing Microsoft Windows games and launchers
 Comment[ru]=Установка и запуск Windows игр и программ
-GenericName=Game
-Categories=Game;
+GenericName=Windows games and program launcher
+GenericName[ru]=Средство запуска Windows игр и программ
+Categories=Game;Utility;
 Type=Application
 Exec=portproton %F
 Icon=portproton
 MimeType=application/x-wine-extension-msp;application/x-msi;application/x-ms-dos-executable;
 StartupNotify=true
 Terminal=false
+Keywords[ru]=wine;windows;game;
+Keywords=wine;windows;game;
