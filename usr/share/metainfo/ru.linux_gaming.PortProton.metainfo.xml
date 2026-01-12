@@ -20,6 +20,7 @@
 	<url type="vcs-browser">https://github.com/Castro-Fidel/PortWINE</url>
 	<url type="help">https://t.me/linux_gaming_ru</url>
 	<url type="faq">https://linux-gaming.ru/c/portproton/4</url>
+	<url type="translate">https://translate.codeberg.org/projects/portproton/</url>
 
 	<metadata_license>CC0-1.0</metadata_license>
 	<project_license>MIT</project_license>
@@ -112,6 +113,14 @@
 	<content_rating type="oars-1.1"/>
 
 	<releases>
+		<release version="1.7.5" date="2026-01-12">
+			<description>
+				<ul>
+					<li>added portproton:// handler for ppdb.linux-gaming.ru</li>
+					<li>added translate url to metainfo</li>
+				</ul>
+			</description>
+		</release>
 		<release version="1.7.3" date="2025-07-21">
 			<description>
 				<ul>

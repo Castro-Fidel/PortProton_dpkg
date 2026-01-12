@@ -1,8 +1,8 @@
 Package: portproton
-Version: 1.7.3
+Version: 1.7.5
 Architecture: amd64
 Installed-Size: 450
-Depends: apt (>= 1.6) | apt-transport-https, ca-certificates, coreutils (>= 8.23-1~) | realpath, curl, file, libc6 (>= 2.15), libnss3 (>= 2:3.26), xz-utils, bubblewrap, tar, vulkan-tools, libvulkan1, libvulkan1:i386, zstd, cabextract, xdg-utils, openssl, bc, libgl1, libgl1:i386, pciutils, desktop-file-utils, fontconfig, yad, jq, libimage-exiftool-perl
+Depends: ca-certificates, coreutils (>= 8.23-1~) | realpath, curl, file, libc6 (>= 2.15), libnss3 (>= 2:3.26), xz-utils, bubblewrap, tar, vulkan-tools, libvulkan1, libvulkan1:i386, zstd, cabextract, xdg-utils, openssl, bc, libgl1, libgl1:i386, pciutils, desktop-file-utils, fontconfig, yad, jq, libimage-exiftool-perl
 Recommends: gamemode, inxi
 Section: games
 Priority: optional

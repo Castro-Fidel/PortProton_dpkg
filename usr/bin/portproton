@@ -4,7 +4,7 @@
 # License MIT
 ########################################################################
 unset PW_AUTOPLAY PW_SET_LANG PW_SILENT_INSTALL
-export port_ver=1.7.3
+export port_ver=1.7.5
 ########################################################################
 cd "$(dirname "$(readlink -f "$0")")"
 script_path="$(pwd)"
